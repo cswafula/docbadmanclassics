@@ -2,17 +2,20 @@
 
 /* ── Design Tokens ── */
 :root {
-  --black:   #0a0a0a;
-  --white:   #ffffff;
-  --cream:   #faf8f5;
-  --gray-50: #f7f7f7;
-  --gray-100:#eeeeee;
-  --gray-300:#cccccc;
-  --gray-500:#888888;
-  --gray-700:#444444;
-  --accent:  #c8963e;
+  --black:    #1e2d1f;        /* deep forest green, replaces pure black */
+  --white:    #fdfdf8;        /* warm white */
+  --cream:    #f2f0e6;        /* warm sage cream */
+  --accent:   #b8963e;        /* antique gold */
+  --accent-light: #e8d8a0;   /* pale gold */
+
+  --gray-50:  #f5f4ee;
+  --gray-100: #e2e0d4;
+  --gray-300: #b8b5a4;
+  --gray-500: #7a7868;
+  --gray-700: #4a4a38;
+
   --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-body:    'Jost', sans-serif;
+  --font-body:    'Jost', system-ui, sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -243,4 +246,14 @@ img { display: block; max-width: 100%; }
   .cart-item-row > div:nth-child(3) { grid-column: 2; }
   .cart-item-row > p:nth-child(4)   { grid-column: 2; font-size: 0.85rem; }
   .cart-item-row > button           { position: absolute; top: 1.5rem; right: 0; }
+}
+
+/* Checkout — stack on mobile */
+@media (max-width: 768px) {
+  .checkout-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .checkout-layout > div:last-child {
+    position: static !important;
+  }
 }

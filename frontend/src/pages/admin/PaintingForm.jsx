@@ -366,7 +366,7 @@ export default function PaintingForm() {
                                     className="input-field"
                                     placeholder="e.g. 40000"
                                     min="0"
-                                    step="500"
+                                    step="50"
                                 />
                             </div>
 

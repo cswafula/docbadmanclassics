@@ -44,4 +44,25 @@ export const adminPaintingsAPI = {
   delete:  (id)           => api.delete(`/admin/paintings/${id}`),
 };
 
+// ── Admin Orders ─────────────────────────────────────────
+export const adminOrdersAPI = {
+  getAll:       (params)       => api.get('/admin/orders', { params }),
+  getById:      (id)           => api.get(`/admin/orders/${id}`),
+  getStats:     ()             => api.get('/admin/orders/stats'),
+  updateStatus: (id, status)   => api.patch(`/admin/orders/${id}/status`, { status }),
+};
+
+// ── Delivery Regions (public) ─────────────────────────────
+export const deliveryRegionsAPI = {
+  getAll: () => api.get('/delivery-regions'),
+};
+
+// ── Admin Delivery Regions ────────────────────────────────
+export const adminDeliveryRegionsAPI = {
+  getAll:  ()          => api.get('/admin/delivery-regions'),
+  create:  (data)      => api.post('/admin/delivery-regions', data),
+  update:  (id, data)  => api.put(`/admin/delivery-regions/${id}`, data),
+  delete:  (id)        => api.delete(`/admin/delivery-regions/${id}`),
+};
+
 export default api;

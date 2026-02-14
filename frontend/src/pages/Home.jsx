@@ -111,7 +111,7 @@ export default function Home() {
     const pillarsRef = useReveal();
 
     useEffect(() => {
-        paintingsAPI.getAll({ per_page: 6 })
+        paintingsAPI.getAll({ is_featured: 1, per_page: 6 })
             .then(res => setPaintings(res.data.data))
             .catch(console.error)
             .finally(() => setLoading(false));
@@ -167,7 +167,7 @@ export default function Home() {
                         {loading ? (
                             [1, 2, 3].map(i => <div key={i} style={{ aspectRatio: '3/4', backgroundColor: 'var(--gray-50)' }} />)
                         ) : paintings.length > 0 ? (
-                            paintings.slice(0, 6).map((p, i) => <PaintingCard key={p.id} painting={p} delay={i + 1} />)
+                            paintings.filter(p => p.is_featured == 1 || p.is_featured === true).slice(0, 6).map((p, i) => <PaintingCard key={p.id} painting={p} delay={i + 1} />)
                         ) : (
                             ['/img-gallery-3.jpg', '/img-gallery-4.jpg', '/img-gallery-5.jpg'].map((src, i) => (
                                 <AtmosphereCard key={i} src={src} delay={i + 1} />

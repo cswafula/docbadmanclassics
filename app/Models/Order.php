@@ -39,8 +39,11 @@ class Order extends Model
     }
 
     // Generate unique order number
-    public static function generateOrderNumber()
+    protected static function boot()
     {
-        return 'ORD-' . strtoupper(uniqid());
+        parent::boot();
+        static::creating(function ($order) {
+            $order->order_number = 'DBC-' . strtoupper(uniqid());
+        });
     }
 }
