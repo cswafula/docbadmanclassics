@@ -64,14 +64,15 @@ class AdminOrderController extends Controller
 }
 
     public function stats()
-    {
-        return response()->json([
-            'total_orders'    => Order::count(),
-            'pending_orders'  => Order::where('status', 'pending')->count(),
-            'total_revenue'   => Order::where('status', 'paid')->sum('total'),
-            'total_paintings' => \App\Models\Painting::count(),
-            'sold_paintings'  => \App\Models\Painting::where('quantity', 0)->count(),
-            'recent_orders'   => Order::with('items')->latest()->take(5)->get(),
-        ]);
-    }
+{
+    return response()->json([
+        'total_orders'    => Order::count(),
+        'pending_orders'  => Order::where('status', 'pending')->count(),
+        'paid_orders'     => Order::where('status', 'paid')->count(),
+        'total_revenue'   => Order::where('status', 'paid')->sum('total'),
+        'total_paintings' => \App\Models\Painting::count(),
+        'sold_paintings'  => \App\Models\Painting::where('quantity', 0)->count(),
+        'recent_orders'   => Order::with('items')->latest()->take(5)->get(),
+    ]);
+}
 }

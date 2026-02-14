@@ -15,6 +15,7 @@ import PaintingForm from './pages/admin/PaintingForm';
 import AdminOrders from './pages/admin/Orders';
 import OrderConfirmation from './pages/OrderConfirmation';
 import AdminDeliveryRegions from './pages/admin/DeliveryRegions';
+import AdminUsers from './pages/admin/Users';
 
 function App() {
   const path = window.location.pathname;
@@ -27,6 +28,7 @@ function App() {
   if (path === '/admin/paintings')                      return <AdminPaintings />;
   if (path === '/admin/orders')                         return <AdminOrders />;
   if (path === '/admin/delivery-regions')               return <AdminDeliveryRegions />;
+  if (path === '/admin/users')                          return <AdminUsers />;
   
 
   // ── Customer routes ───────────────────────

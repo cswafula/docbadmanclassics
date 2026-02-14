@@ -3,23 +3,24 @@ import useAuthStore from '../../store/authStore';
 
 // ── Admin colour tokens ───────────────────────────────────
 const theme = {
-  sidebarBg:     '#1e2d1f',   // deep forest green
+  sidebarBg: '#1e2d1f',   // deep forest green
   sidebarBorder: '#2d3f2e',   // slightly lighter green
-  sidebarText:   '#a8b9a9',   // muted sage
+  sidebarText: '#a8b9a9',   // muted sage
   sidebarActive: '#f2f0e6',   // warm cream (active text)
   sidebarActiveBg: '#2d3f2e', // active item bg
-  sidebarHover:  'rgba(255,255,255,0.05)',
-  accent:        '#b8963e',   // antique gold
-  mainBg:        '#f5f3ea',   // warm sage cream
-  headerBg:      '#fff',
-  headerBorder:  '#e8e4d9',
+  sidebarHover: 'rgba(255,255,255,0.05)',
+  accent: '#b8963e',   // antique gold
+  mainBg: '#f5f3ea',   // warm sage cream
+  headerBg: '#fff',
+  headerBorder: '#e8e4d9',
 };
 
 const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: '▤' },
-  { label: 'Paintings',  href: '/admin/paintings',  icon: '◻' },
-  { label: 'Orders',     href: '/admin/orders',     icon: '◈' },
+  { label: 'Paintings', href: '/admin/paintings', icon: '◻' },
+  { label: 'Orders', href: '/admin/orders', icon: '◈' },
   { label: 'Regions', href: '/admin/delivery-regions', icon: '◎' },
+  { label: 'Users', href: '/admin/users', icon: '◯' },
 ];
 
 export default function AdminLayout({ children, currentPage }) {

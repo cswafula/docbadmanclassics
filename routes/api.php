@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Admin\AdminOrderController;
 use App\Http\Controllers\Api\PesaPalController;
 use App\Http\Controllers\Api\DeliveryRegionController;
 use App\Http\Controllers\Api\Admin\AdminDeliveryRegionController;
+use App\Http\Controllers\Api\Admin\AdminUserController;
 
 // ── Public routes ──────────────────────────────────────────
 Route::prefix('v1')->group(function () {
@@ -55,4 +56,10 @@ Route::prefix('v1')->group(function () {
     Route::post('/delivery-regions',      [AdminDeliveryRegionController::class, 'store']);
     Route::put('/delivery-regions/{id}',  [AdminDeliveryRegionController::class, 'update']);
     Route::delete('/delivery-regions/{id}', [AdminDeliveryRegionController::class, 'destroy']);
+
+    // Users
+    Route::get('/users',                    [AdminUserController::class, 'index']);
+    Route::post('/users',                   [AdminUserController::class, 'store']);
+    Route::patch('/users/{id}/password',    [AdminUserController::class, 'updatePassword']);
+    Route::delete('/users/{id}',            [AdminUserController::class, 'destroy']);
 });

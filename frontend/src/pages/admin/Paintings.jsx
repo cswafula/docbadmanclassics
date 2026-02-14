@@ -9,19 +9,22 @@ export default function AdminPaintings() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
   const [message, setMessage] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      window.location.href = '/admin';
-      return;
-    }
+    if (!isAuthenticated()) { window.location.href = '/admin'; return; }
     fetchPaintings();
   }, []);
 
-  const fetchPaintings = async () => {
+  const fetchPaintings = async (page = 1) => {
     try {
-      const res = await adminPaintingsAPI.getAll();
+      const res = await adminPaintingsAPI.getAll({ page, per_page: 20 });
       setPaintings(res.data.data);
+      setCurrentPage(res.data.current_page);
+      setLastPage(res.data.last_page);
+      setTotal(res.data.total);
     } catch (err) {
       console.error(err);
     } finally {
@@ -51,7 +54,7 @@ export default function AdminPaintings() {
       {/* Top bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <p style={{ fontSize: '0.875rem', color: '#9E9E9E' }}>
-          {paintings.length} painting{paintings.length !== 1 ? 's' : ''} in gallery
+          {total} painting{total !== 1 ? 's' : ''} in gallery
         </p>
         <a href="/admin/paintings/new" className="btn-primary">
           + Add New Painting
@@ -173,6 +176,64 @@ export default function AdminPaintings() {
           ))
         )}
       </div>
+
+      {lastPage > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderTop: '1px solid var(--gray-100)', backgroundColor: 'var(--cream)' }}>
+          <p style={{ fontSize: '0.72rem', color: 'var(--gray-500)' }}>
+            Page {currentPage} of {lastPage} · {total} total
+          </p>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={() => fetchPaintings(currentPage - 1)}
+              disabled={currentPage === 1}
+              style={{
+                padding: '0.4rem 0.875rem', fontSize: '0.72rem', letterSpacing: '0.08em',
+                textTransform: 'uppercase', border: '1px solid var(--gray-100)',
+                backgroundColor: '#fff', cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                opacity: currentPage === 1 ? 0.4 : 1, fontFamily: 'var(--font-body)',
+              }}
+            >
+              ← Prev
+            </button>
+            {Array.from({ length: lastPage }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === lastPage || Math.abs(p - currentPage) <= 1)
+              .reduce((acc, p, idx, arr) => {
+                if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, idx) => p === '...' ? (
+                <span key={`ellipsis-${idx}`} style={{ padding: '0.4rem 0.5rem', fontSize: '0.72rem', color: 'var(--gray-300)' }}>…</span>
+              ) : (
+                <button key={p} onClick={() => fetchPaintings(p)}
+                  style={{
+                    padding: '0.4rem 0.75rem', fontSize: '0.72rem', letterSpacing: '0.08em',
+                    textTransform: 'uppercase', border: '1px solid',
+                    borderColor: p === currentPage ? 'var(--black)' : 'var(--gray-100)',
+                    backgroundColor: p === currentPage ? 'var(--black)' : '#fff',
+                    color: p === currentPage ? '#fff' : 'var(--black)',
+                    cursor: 'pointer', fontFamily: 'var(--font-body)',
+                  }}
+                >
+                  {p}
+                </button>
+              ))
+            }
+            <button
+              onClick={() => fetchPaintings(currentPage + 1)}
+              disabled={currentPage === lastPage}
+              style={{
+                padding: '0.4rem 0.875rem', fontSize: '0.72rem', letterSpacing: '0.08em',
+                textTransform: 'uppercase', border: '1px solid var(--gray-100)',
+                backgroundColor: '#fff', cursor: currentPage === lastPage ? 'not-allowed' : 'pointer',
+                opacity: currentPage === lastPage ? 0.4 : 1, fontFamily: 'var(--font-body)',
+              }}
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
 
     </AdminLayout>
   );

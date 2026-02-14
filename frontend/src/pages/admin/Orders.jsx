@@ -4,12 +4,12 @@ import useAuthStore from '../../store/authStore';
 import { adminOrdersAPI } from '../../services/api';
 
 const statusColors = {
-  pending:    { bg: '#fff8e1', color: '#f59e0b' },
-  paid:       { bg: '#f0fdf4', color: '#16a34a' },
+  pending: { bg: '#fff8e1', color: '#f59e0b' },
+  paid: { bg: '#f0fdf4', color: '#16a34a' },
   processing: { bg: '#e0f2fe', color: '#0284c7' },
-  shipped:    { bg: '#ede9fe', color: '#7c3aed' },
-  delivered:  { bg: '#dcfce7', color: '#15803d' },
-  cancelled:  { bg: '#fef2f2', color: '#dc2626' },
+  shipped: { bg: '#ede9fe', color: '#7c3aed' },
+  delivered: { bg: '#dcfce7', color: '#15803d' },
+  cancelled: { bg: '#fef2f2', color: '#dc2626' },
 };
 
 const ALL_STATUSES = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];
@@ -23,19 +23,27 @@ export default function AdminOrders() {
   const [selected, setSelected] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
   const [message, setMessage] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated()) { window.location.href = '/admin'; return; }
   }, []);
 
   useEffect(() => {
-    fetchOrders();
+    fetchOrders(1);
   }, [search, statusFilter]);
 
-  const fetchOrders = () => {
+  const fetchOrders = (page = 1) => {
     setLoading(true);
-    adminOrdersAPI.getAll({ search, status: statusFilter })
-      .then(res => setOrders(res.data.data || []))
+    adminOrdersAPI.getAll({ search, status: statusFilter, page })
+      .then(res => {
+        setOrders(res.data.data || []);
+        setCurrentPage(res.data.current_page);
+        setLastPage(res.data.last_page);
+        setTotal(res.data.total);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   };
@@ -141,7 +149,7 @@ export default function AdminOrders() {
           {/* Count */}
           <div style={{ padding: '0.875rem 1.5rem', borderBottom: '1px solid var(--gray-100)', backgroundColor: 'var(--cream)' }}>
             <p style={{ fontSize: '0.72rem', color: 'var(--gray-500)' }}>
-              {loading ? 'Loading…' : `${orders.length} order${orders.length !== 1 ? 's' : ''}`}
+              {loading ? 'Loading…' : `${total} order${total !== 1 ? 's' : ''}`}
             </p>
           </div>
 
@@ -244,6 +252,64 @@ export default function AdminOrders() {
           )}
         </div>
 
+        {lastPage > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderTop: '1px solid var(--gray-100)', backgroundColor: 'var(--cream)' }}>
+            <p style={{ fontSize: '0.72rem', color: 'var(--gray-500)' }}>
+              Page {currentPage} of {lastPage} · {total} total
+            </p>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={() => fetchOrders(currentPage - 1)}
+                disabled={currentPage === 1}
+                style={{
+                  padding: '0.4rem 0.875rem', fontSize: '0.72rem', letterSpacing: '0.08em',
+                  textTransform: 'uppercase', border: '1px solid var(--gray-100)',
+                  backgroundColor: '#fff', cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === 1 ? 0.4 : 1, fontFamily: 'var(--font-body)',
+                }}
+              >
+                ← Prev
+              </button>
+              {Array.from({ length: lastPage }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === lastPage || Math.abs(p - currentPage) <= 1)
+                .reduce((acc, p, idx, arr) => {
+                  if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                  acc.push(p);
+                  return acc;
+                }, [])
+                .map((p, idx) => p === '...' ? (
+                  <span key={`ellipsis-${idx}`} style={{ padding: '0.4rem 0.5rem', fontSize: '0.72rem', color: 'var(--gray-300)' }}>…</span>
+                ) : (
+                  <button key={p} onClick={() => fetchOrders(p)}
+                    style={{
+                      padding: '0.4rem 0.75rem', fontSize: '0.72rem', letterSpacing: '0.08em',
+                      textTransform: 'uppercase', border: '1px solid',
+                      borderColor: p === currentPage ? 'var(--black)' : 'var(--gray-100)',
+                      backgroundColor: p === currentPage ? 'var(--black)' : '#fff',
+                      color: p === currentPage ? '#fff' : 'var(--black)',
+                      cursor: 'pointer', fontFamily: 'var(--font-body)',
+                    }}
+                  >
+                    {p}
+                  </button>
+                ))
+              }
+              <button
+                onClick={() => fetchOrders(currentPage + 1)}
+                disabled={currentPage === lastPage}
+                style={{
+                  padding: '0.4rem 0.875rem', fontSize: '0.72rem', letterSpacing: '0.08em',
+                  textTransform: 'uppercase', border: '1px solid var(--gray-100)',
+                  backgroundColor: '#fff', cursor: currentPage === lastPage ? 'not-allowed' : 'pointer',
+                  opacity: currentPage === lastPage ? 0.4 : 1, fontFamily: 'var(--font-body)',
+                }}
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ── Order Detail Panel ── */}
         {selected && (
           <div style={{ border: '1px solid var(--gray-100)', backgroundColor: '#fff', position: 'sticky', top: '80px' }}>
@@ -267,9 +333,9 @@ export default function AdminOrders() {
               {/* Customer info */}
               <p className="eyebrow" style={{ marginBottom: '0.75rem' }}>Customer</p>
               {[
-                { label: 'Name',    value: selected.customer_name },
-                { label: 'Email',   value: selected.customer_email },
-                { label: 'Phone',   value: selected.customer_phone },
+                { label: 'Name', value: selected.customer_name },
+                { label: 'Email', value: selected.customer_email },
+                { label: 'Phone', value: selected.customer_phone },
                 { label: 'Address', value: selected.shipping_address },
               ].map(item => (
                 <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.6rem 0', borderBottom: '1px solid var(--gray-50)', gap: '1rem' }}>
@@ -301,8 +367,8 @@ export default function AdminOrders() {
               {/* Totals */}
               <div style={{ marginTop: '0.5rem' }}>
                 {[
-                  { label: 'Subtotal',  value: `KES ${parseFloat(selected.subtotal).toLocaleString()}` },
-                  { label: 'Shipping',  value: `KES ${parseFloat(selected.shipping_cost).toLocaleString()}` },
+                  { label: 'Subtotal', value: `KES ${parseFloat(selected.subtotal).toLocaleString()}` },
+                  { label: 'Shipping', value: `KES ${parseFloat(selected.shipping_cost).toLocaleString()}` },
                 ].map(line => (
                   <div key={line.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid var(--gray-50)' }}>
                     <span style={{ fontSize: '0.78rem', color: 'var(--gray-500)' }}>{line.label}</span>

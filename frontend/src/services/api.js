@@ -65,4 +65,12 @@ export const adminDeliveryRegionsAPI = {
   delete:  (id)        => api.delete(`/admin/delivery-regions/${id}`),
 };
 
+// ── Admin Users ───────────────────────────────────────────
+export const adminUsersAPI = {
+  getAll:         ()          => api.get('/admin/users'),
+  create:         (data)      => api.post('/admin/users', data),
+  updatePassword: (id, data)  => api.patch(`/admin/users/${id}/password`, data),
+  delete:         (id)        => api.delete(`/admin/users/${id}`),
+};
+
 export default api;
