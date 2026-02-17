@@ -15,7 +15,7 @@ export default function OrderConfirmation() {
     }
 
     // Verify payment with backend
-    fetch(`http://127.0.0.1:8000/api/v1/pesapal/verify?OrderTrackingId=${trackingId}&order=${orderNumber}`)
+    fetch(`https://docbadmanclassics.org/api/v1/pesapal/verify?OrderTrackingId=${trackingId}&order=${orderNumber}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'Completed') {

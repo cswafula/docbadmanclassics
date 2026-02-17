@@ -41,7 +41,7 @@ export default function Museum() {
                 A Century of East African Journeys
               </h2>
               <p style={{ fontSize: '0.95rem', lineHeight: 1.9, color: 'var(--gray-700)', marginBottom: '1.5rem' }}>
-                This museum celebrates the societal advancements that have been made possible by the engine — in farms, industries, countless journeys that have united families, started and ended wars, rescued lives, inspired art and the meeting of hearts and minds.
+                Our museum celebrates the societal advancements that have been made possible by the engine — in farms, industries, countless journeys that have united families, started and ended wars, rescued lives, inspired art and the meeting of hearts and minds.
               </p>
               <p style={{ fontSize: '0.95rem', lineHeight: 1.9, color: 'var(--gray-700)', marginBottom: '1.5rem' }}>
                 Dr. Rombosia fervently hopes and prays that this museum will keep revving, piston by piston, for countless years to come — reminding future generations about the magic of the engine in an East African perspective.
@@ -62,10 +62,10 @@ export default function Museum() {
         <div className="container">
           <div ref={r2} className="reveal" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '2rem' }}>
             {[
-              { title: 'Classic Cars', desc: 'Vintage and classic automobiles, some of which have competed in the Africa Concours d\'Élégance since 2015.' },
-              { title: 'Motorcycles', desc: 'A curated collection of classic motorcycles representing decades of engineering excellence in East Africa.' },
+              { title: 'Classic Cars', desc: 'A curated collection of classic cars representing decades of engineering excellence in East Africa.' },
+              { title: 'Motorcycles', desc: 'Vintage and classic automobiles, some of which have competed in the Africa Concours d\'Élégance since 2015.' },
               { title: 'Auto Restoration', desc: 'Witness the art of restoring classic vehicles to their former glory, preserving history for future generations.' },
-              { title: 'Educational Focus', desc: 'The museum serves as an educational center, teaching visitors about technological advancements and social significance of transport in Africa.' },
+              { title: 'Educational Focus', desc: 'The museum serves as an educational center, teaching visitors about technological advancements and social significance of transport in East Africa.' },
             ].map((item, i) => (
               <div key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
                 <p className="eyebrow-accent" style={{ marginBottom: '0.75rem' }}>0{i + 1}</p>

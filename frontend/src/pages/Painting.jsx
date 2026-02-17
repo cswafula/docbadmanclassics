@@ -110,7 +110,7 @@ export default function Painting() {
       </div>
 
       {/* ── Main layout ── */}
-      <div className="container" style={{ padding: '3rem 0 5rem' }}>
+      <div className="container" style={{ paddingTop: '3rem', paddingBottom: '5rem' }}>
         <div className="painting-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '4rem', alignItems: 'start' }}>
 
           {/* Left — Images */}

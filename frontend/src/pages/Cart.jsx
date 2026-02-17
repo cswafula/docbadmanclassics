@@ -27,8 +27,6 @@ export default function Cart() {
   };
 
   const subtotal = cart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0);
-  const shipping = cart.length > 0 ? 500 : 0;
-  const total    = subtotal + shipping;
 
   return (
     <div>
@@ -41,7 +39,7 @@ export default function Cart() {
         </div>
       </div>
 
-      <div className="container" style={{ padding: '3rem 0 5rem' }}>
+      <div className="container" style={{ paddingTop: '3rem', paddingBottom: '5rem' }}>
 
         {cart.length === 0 ? (
 
@@ -123,21 +121,26 @@ export default function Cart() {
             <div style={{ backgroundColor: 'var(--cream)', padding: '2rem', position: 'sticky', top: '88px', border: '1px solid var(--gray-100)' }}>
               <p className="eyebrow" style={{ marginBottom: '1.75rem' }}>Order Summary</p>
 
-              {/* Lines */}
-              {[
-                { label: `Subtotal (${cart.length} item${cart.length > 1 ? 's' : ''})`, value: `KES ${subtotal.toLocaleString()}` },
-                { label: 'Shipping',                                                      value: `KES ${shipping.toLocaleString()}` },
-              ].map(line => (
-                <div key={line.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--gray-100)' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--gray-700)' }}>{line.label}</span>
-                  <span style={{ fontSize: '0.85rem' }}>{line.value}</span>
-                </div>
-              ))}
+              {/* Subtotal */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--gray-100)' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--gray-700)' }}>
+                  Subtotal ({cart.length} item{cart.length > 1 ? 's' : ''})
+                </span>
+                <span style={{ fontSize: '0.85rem' }}>KES {subtotal.toLocaleString()}</span>
+              </div>
+
+              {/* Shipping */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--gray-100)' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--gray-700)' }}>Shipping</span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--gray-500)', fontStyle: 'italic' }}>Calculated at checkout</span>
+              </div>
 
               {/* Total */}
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1.25rem 0', marginBottom: '1.5rem' }}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Total</span>
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 300 }}>KES {total.toLocaleString()}</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 300 }}>
+                  KES {subtotal.toLocaleString()}
+                </span>
               </div>
 
               <a href="/checkout" className="btn-primary" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>

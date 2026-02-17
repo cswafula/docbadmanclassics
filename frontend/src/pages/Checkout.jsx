@@ -52,7 +52,7 @@ export default function Checkout() {
     setError('');
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/v1/orders', {
+      const response = await fetch('https://docbadmanclassics.org/api/v1/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -90,7 +90,7 @@ export default function Checkout() {
       }
 
       // Order created — now initiate PesaPal payment
-      const paymentRes = await fetch('http://127.0.0.1:8000/api/v1/pesapal/initiate', {
+      const paymentRes = await fetch('https://docbadmanclassics.org/api/v1/pesapal/initiate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order_id: data.order_id }),

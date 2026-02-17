@@ -12,41 +12,22 @@ class PaintingController extends Controller
      * Get all available paintings for the gallery
      */
     public function index(Request $request)
-    {
-        $query = Painting::with('images')->available();
+{
+    $query = Painting::with('images')
+        ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
+        ->when($request->artist, fn($q) => $q->where('artist', $request->artist));
 
-        // Filter by artist
-        if ($request->has('artist')) {
-            $query->where('artist', 'like', '%' . $request->artist . '%');
-        }
+    match($request->sort) {
+        'price_asc'  => $query->orderBy('price', 'asc'),
+        'price_desc' => $query->orderBy('price', 'desc'),
+        'title_asc'  => $query->orderBy('title', 'asc'),
+        'title_desc' => $query->orderBy('title', 'desc'),
+        'oldest'     => $query->oldest(),
+        default      => $query->latest(),
+    };
 
-        // Filter by price range
-        if ($request->has('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        }
-        if ($request->has('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        // Search
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('artist', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-
-        // Sort
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
-
-        $paintings = $query->paginate($request->get('per_page', 12));
-
-        return response()->json($paintings);
-    }
+    return response()->json($query->paginate(20));
+}
 
     /**
      * Get featured paintings

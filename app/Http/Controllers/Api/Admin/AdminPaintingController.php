@@ -8,6 +8,7 @@ use App\Models\PaintingImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class AdminPaintingController extends Controller
 {
@@ -144,16 +145,22 @@ class AdminPaintingController extends Controller
 
     // Delete painting
     public function destroy($id)
-    {
-        $painting = Painting::findOrFail($id);
+{
+    $painting = Painting::findOrFail($id);
 
-        // Delete images from storage
-        foreach ($painting->images as $image) {
-            Storage::disk('public')->delete($image->image_path);
-        }
-
-        $painting->delete();
-
-        return response()->json(['message' => 'Painting deleted successfully']);
+    // Delete image files from storage
+    foreach ($painting->images as $image) {
+        Storage::disk('public')->delete($image->image_path);
+        Storage::disk('public_direct')->delete($image->image_path);
     }
+
+    // Delete related order items
+    DB::table('order_items')->where('painting_id', $painting->id)->delete();
+
+    // Delete image records then the painting
+    $painting->images()->delete();
+    $painting->delete();
+
+    return response()->json(['message' => 'Painting deleted successfully']);
+}
 }

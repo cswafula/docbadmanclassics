@@ -16,6 +16,7 @@ import AdminOrders from './pages/admin/Orders';
 import OrderConfirmation from './pages/OrderConfirmation';
 import AdminDeliveryRegions from './pages/admin/DeliveryRegions';
 import AdminUsers from './pages/admin/Users';
+import Donate from './pages/Donate';
 
 function App() {
   const path = window.location.pathname;
@@ -45,6 +46,7 @@ function App() {
         {path === '/museum'                    && <Museum />}
         {path === '/coffee'                    && <Coffee />}
         {path === '/order-confirmation'        && <OrderConfirmation />}
+        {path === '/donate'                    && <Donate />}
       </main>
       <Footer />
     </div>
