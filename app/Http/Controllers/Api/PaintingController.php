@@ -14,6 +14,7 @@ class PaintingController extends Controller
     public function index(Request $request)
 {
     $query = Painting::with('images')
+        ->when($request->type, fn($q) => $q->where('type', $request->type))
         ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
         ->when($request->artist, fn($q) => $q->where('artist', $request->artist));
 
@@ -56,9 +57,10 @@ class PaintingController extends Controller
     /**
      * Get unique artists
      */
-    public function artists()
+    public function artists(Request $request)
     {
         $artists = Painting::select('artist')
+            ->when($request->type, fn($q) => $q->where('type', $request->type))
             ->distinct()
             ->orderBy('artist')
             ->pluck('artist');

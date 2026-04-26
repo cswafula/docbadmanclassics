@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/v1',
+  baseURL: `${import.meta.env.VITE_API_URL}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -21,7 +21,12 @@ export const paintingsAPI = {
   getAll: (params) => api.get('/paintings', { params }),
   getFeatured: () => api.get('/paintings/featured'),
   getById: (id) => api.get(`/paintings/${id}`),
-  getArtists: () => api.get('/artists'),
+  getArtists: (params) => api.get('/artists', { params }),
+};
+
+export const craftsAPI = {
+  getAll: (params) => api.get('/crafts', { params }),
+  getById: (id) => api.get(`/crafts/${id}`),
 };
 
 // ── Admin Auth API ──────────────────────────
@@ -42,6 +47,19 @@ export const adminPaintingsAPI = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   delete: (id) => api.delete(`/admin/paintings/${id}`),
+};
+
+// ── Admin Crafts API ──────────────────────────────────────────
+export const adminCraftsAPI = {
+  getAll: (params) => api.get('/admin/crafts', { params }),
+  getById: (id) => api.get(`/admin/crafts/${id}`),
+  create: (formData) => api.post('/admin/crafts', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  update: (id, data) => api.post(`/admin/crafts/${id}`, data, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  delete: (id) => api.delete(`/admin/crafts/${id}`),
 };
 
 // ── Admin Orders ─────────────────────────────────────────

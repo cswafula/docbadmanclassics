@@ -10,6 +10,7 @@ class Painting extends Model
     use HasFactory;
 
     protected $fillable = [
+        'type',
         'title',
         'description',
         'artist',
@@ -19,7 +20,7 @@ class Painting extends Model
         'medium',
         'year',
         'is_featured',
-        'is_available'
+        'is_available',
     ];
 
     protected $casts = [
@@ -81,5 +82,11 @@ class Painting extends Model
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
+    }
+
+    // Filter by type ('painting' or 'craft')
+    public function scopeOfType($query, $type)
+    {
+        return $query->where('type', $type);
     }
 }

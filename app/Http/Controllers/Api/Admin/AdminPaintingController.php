@@ -12,10 +12,14 @@ use Illuminate\Support\Facades\DB;
 
 class AdminPaintingController extends Controller
 {
-    // Get all paintings (admin sees everything)
+    // Get all paintings/crafts (admin sees everything)
     public function index(Request $request)
     {
         $query = Painting::with('images')->latest();
+
+        if ($request->has('type')) {
+            $query->where('type', $request->type);
+        }
 
         if ($request->has('search')) {
             $search = $request->search;
@@ -58,6 +62,7 @@ class AdminPaintingController extends Controller
         }
 
         $painting = Painting::create([
+            'type'         => $request->input('type', 'painting'),
             'title'        => $request->title,
             'artist'       => $request->artist,
             'description'  => $request->description,
@@ -112,6 +117,7 @@ class AdminPaintingController extends Controller
     }
 
     $painting->update([
+        'type'         => $request->input('type', $painting->type),
         'title'        => $request->input('title', $painting->title),
         'artist'       => $request->input('artist', $painting->artist),
         'description'  => $request->input('description', $painting->description),

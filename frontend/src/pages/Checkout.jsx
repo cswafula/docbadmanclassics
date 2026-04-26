@@ -62,7 +62,10 @@ export default function Checkout() {
           shipping_address: `${formData.shipping_address}, ${formData.city}`,
           region: formData.region_name,
           items: cart.map(item => ({
-            painting_id: item.id,
+            ...(item.itemType === 'craft'
+              ? { craft_id: item.id, item_type: 'craft' }
+              : { painting_id: item.id, item_type: 'painting' }
+            ),
             painting_title: item.title,
             price: item.price,
             quantity: item.quantity,

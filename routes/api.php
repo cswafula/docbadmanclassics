@@ -2,9 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PaintingController;
+use App\Http\Controllers\Api\CraftController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\Admin\AuthController;
 use App\Http\Controllers\Api\Admin\AdminPaintingController;
+use App\Http\Controllers\Api\Admin\AdminCraftController;
 use App\Http\Controllers\Api\Admin\AdminOrderController;
 use App\Http\Controllers\Api\PesaPalController;
 use App\Http\Controllers\Api\DeliveryRegionController;
@@ -18,6 +20,9 @@ Route::prefix('v1')->group(function () {
     Route::get('/paintings/featured', [PaintingController::class, 'featured']);
     Route::get('/paintings/{id}',     [PaintingController::class, 'show']);
     Route::get('/artists',            [PaintingController::class, 'artists']);
+
+    Route::get('/crafts',             [CraftController::class, 'index']);
+    Route::get('/crafts/{id}',        [CraftController::class, 'show']);
 
     Route::post('/admin/login', [AuthController::class, 'login']);
     Route::post('/orders',      [OrderController::class, 'store']);
@@ -44,6 +49,14 @@ Route::prefix('v1')->group(function () {
     Route::post('/paintings/{id}',   [AdminPaintingController::class, 'update']);
     Route::put('/paintings/{id}',    [AdminPaintingController::class, 'update']);
     Route::delete('/paintings/{id}', [AdminPaintingController::class, 'destroy']);
+
+    // Crafts CRUD
+    Route::get('/crafts',            [AdminCraftController::class, 'index']);
+    Route::get('/crafts/{id}',       [AdminCraftController::class, 'show']);
+    Route::post('/crafts',           [AdminCraftController::class, 'store']);
+    Route::post('/crafts/{id}',      [AdminCraftController::class, 'update']);
+    Route::put('/crafts/{id}',       [AdminCraftController::class, 'update']);
+    Route::delete('/crafts/{id}',    [AdminCraftController::class, 'destroy']);
 
     // Orders
     Route::get('/orders/stats',         [AdminOrderController::class, 'stats']);

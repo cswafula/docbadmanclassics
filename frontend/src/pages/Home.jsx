@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { paintingsAPI } from '../services/api';
+import { paintingsAPI, craftsAPI } from '../services/api';
 
 /* ── Scroll reveal hook ── */
 function useReveal() {
@@ -147,8 +147,62 @@ function AtmosphereCard({ src }) {
   );
 }
 
+/* ── Craft Card ── */
+function CraftCard({ craft }) {
+  const isSold = craft.quantity <= 0;
+
+  const inner = (
+    <>
+      <div style={{ aspectRatio: '3/4', backgroundColor: 'var(--gray-50)', overflow: 'hidden', marginBottom: '1rem', position: 'relative', flexShrink: 0 }}>
+        {craft.image
+          ? <img
+              src={craft.image}
+              alt={craft.title}
+              style={{
+                width: '100%', height: '100%', objectFit: 'cover',
+                transition: 'transform 0.6s ease',
+                filter: isSold ? 'grayscale(50%) brightness(0.9)' : 'none',
+              }}
+              onMouseOver={e => { if (!isSold) e.currentTarget.style.transform = 'scale(1.05)'; }}
+              onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+            />
+          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gray-300)', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              No Image
+            </div>
+        }
+        {isSold && (
+          <div style={{ position: 'absolute', top: '1rem', left: '1rem', backgroundColor: '#dc2626', color: '#fff', padding: '0.35rem 0.875rem', fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', fontWeight: 600, boxShadow: '0 2px 8px rgba(220,38,38,0.4)' }}>
+            Sold
+          </div>
+        )}
+      </div>
+      <p className="eyebrow" style={{ marginBottom: '0.3rem' }}>Handcrafted</p>
+      <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', marginBottom: '0.5rem', lineHeight: 1.3, color: isSold ? 'var(--gray-300)' : 'var(--black)' }}>
+        {craft.title}
+      </p>
+      <p style={{
+        fontSize: isSold ? '0.65rem' : '0.9rem',
+        color: isSold ? '#dc2626' : 'var(--black)',
+        letterSpacing: isSold ? '0.2em' : '0',
+        textTransform: isSold ? 'uppercase' : 'none',
+        fontWeight: isSold ? 600 : 400,
+      }}>
+        {isSold ? 'Sold' : `KES ${parseFloat(craft.price).toLocaleString()}`}
+      </p>
+    </>
+  );
+
+  return isSold ? (
+    <div style={{ width: '260px', flexShrink: 0, cursor: 'default' }}>{inner}</div>
+  ) : (
+    <a href={`/crafts/${craft.id}`} style={{ width: '260px', flexShrink: 0, textDecoration: 'none', color: 'inherit', display: 'block' }}>
+      {inner}
+    </a>
+  );
+}
+
 /* ── Collection Carousel ── */
-function CollectionCarousel({ paintings, loading }) {
+function CollectionCarousel({ paintings, loading, viewAllHref = '/gallery', itemType = 'painting' }) {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft]   = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -228,11 +282,21 @@ function CollectionCarousel({ paintings, loading }) {
             </div>
           ))
         ) : paintings.length > 0 ? (
-          paintings.map(p => <PaintingCard key={p.id} painting={p} />)
-        ) : (
+          itemType === 'craft'
+            ? paintings.map(c => <CraftCard key={c.id} craft={c} />)
+            : paintings.map(p => <PaintingCard key={p.id} painting={p} />)
+        ) : itemType === 'painting' ? (
           ['/img-gallery-3.jpg', '/img-gallery-4.jpg', '/img-gallery-5.jpg'].map((src, i) => (
             <AtmosphereCard key={i} src={src} />
           ))
+        ) : (
+          /* Crafts empty state — no atmosphere images, just a prompt */
+          <div style={{ width: '100%', padding: '4rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 300, color: 'var(--gray-300)' }}>Crafts coming soon</p>
+            <a href="/crafts" style={{ fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--black)', textDecoration: 'none', borderBottom: '1px solid var(--black)', paddingBottom: '2px' }}>
+              View Collection →
+            </a>
+          </div>
         )}
       </div>
 
@@ -266,7 +330,7 @@ function CollectionCarousel({ paintings, loading }) {
         </div>
 
         {/* View all */}
-        <a href="/gallery" style={{ fontFamily: 'var(--font-body)', fontSize: '0.72rem', fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--black)', textDecoration: 'none', borderBottom: '1px solid var(--black)', paddingBottom: '2px', whiteSpace: 'nowrap' }}>
+        <a href={viewAllHref} style={{ fontFamily: 'var(--font-body)', fontSize: '0.72rem', fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--black)', textDecoration: 'none', borderBottom: '1px solid var(--black)', paddingBottom: '2px', whiteSpace: 'nowrap' }}>
           View All →
         </a>
       </div>
@@ -275,14 +339,23 @@ function CollectionCarousel({ paintings, loading }) {
 }
 
 export default function Home() {
+  const [activeTab, setActiveTab]   = useState('paintings');
   const [paintings, setPaintings]   = useState([]);
+  const [crafts, setCrafts]         = useState([]);
   const [loading, setLoading]       = useState(true);
   const galleryRef = useReveal();
   const pillarsRef = useReveal();
 
   useEffect(() => {
-    paintingsAPI.getAll({ per_page: 20 })
-      .then(res => setPaintings(res.data.data))
+    setLoading(true);
+    Promise.all([
+      paintingsAPI.getAll({ per_page: 20 }),
+      craftsAPI.getAll({ per_page: 20 }),
+    ])
+      .then(([pRes, cRes]) => {
+        setPaintings(pRes.data.data);
+        setCrafts(cRes.data.data);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -322,17 +395,52 @@ export default function Home() {
       {/* ── GALLERY CAROUSEL ── */}
       <section style={{ padding: '5rem 0' }}>
         <div className="container">
-          <div ref={galleryRef} className="reveal" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <p className="eyebrow" style={{ marginBottom: '0.6rem' }}>Art Gallery</p>
-              <h2 className="display" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>Our Collection</h2>
+          <div ref={galleryRef} className="reveal" style={{ marginBottom: '2.5rem' }}>
+            {/* Tabs */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div>
+                <p className="eyebrow" style={{ marginBottom: '0.6rem' }}>Art Gallery</p>
+                <div style={{ display: 'flex', gap: '0', borderBottom: '1px solid var(--gray-100)' }}>
+                  {[
+                    { key: 'paintings', label: 'Our Paintings Collection', href: '/gallery' },
+                    { key: 'crafts',    label: 'Our Crafts Collection',    href: '/crafts'  },
+                  ].map(tab => (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      style={{
+                        padding: '0.6rem 1.25rem',
+                        fontFamily: 'var(--font-display)',
+                        fontSize: 'clamp(1rem, 2.5vw, 1.5rem)',
+                        fontWeight: 300,
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: activeTab === tab.key ? '2px solid var(--black)' : '2px solid transparent',
+                        marginBottom: '-1px',
+                        cursor: 'pointer',
+                        color: activeTab === tab.key ? 'var(--black)' : 'var(--gray-300)',
+                        transition: 'color 0.2s, border-color 0.2s',
+                        whiteSpace: 'nowrap',
+                        paddingLeft: tab.key === 'paintings' ? 0 : '1.25rem',
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>
+                {!loading && `${activeTab === 'paintings' ? paintings.length : crafts.length} works · Scroll to explore`}
+              </p>
             </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>
-              {!loading && `${paintings.length} works · Scroll to explore`}
-            </p>
           </div>
 
-          <CollectionCarousel paintings={paintings} loading={loading} />
+          <CollectionCarousel
+            paintings={activeTab === 'paintings' ? paintings : crafts}
+            loading={loading}
+            viewAllHref={activeTab === 'paintings' ? '/gallery' : '/crafts'}
+            itemType={activeTab === 'paintings' ? 'painting' : 'craft'}
+          />
         </div>
       </section>
 

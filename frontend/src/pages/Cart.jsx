@@ -69,7 +69,7 @@ export default function Cart() {
                 <div key={item.id} className="cart-item-row" style={{ display: 'grid', gridTemplateColumns: '72px 1fr 130px 110px 32px', gap: '1rem', padding: '1.5rem 0', borderBottom: '1px solid var(--gray-50)', alignItems: 'center' }}>
 
                   {/* Image */}
-                  <a href={`/paintings/${item.id}`} style={{ display: 'block', width: '72px', height: '72px', backgroundColor: 'var(--gray-50)', overflow: 'hidden', flexShrink: 0 }}>
+                  <a href={item.itemType === 'craft' ? `/crafts/${item.id}` : `/paintings/${item.id}`} style={{ display: 'block', width: '72px', height: '72px', backgroundColor: 'var(--gray-50)', overflow: 'hidden', flexShrink: 0 }}>
                     {item.image
                       ? <img src={item.image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : <div style={{ width: '100%', height: '100%', backgroundColor: 'var(--gray-100)' }} />
@@ -78,9 +78,9 @@ export default function Cart() {
 
                   {/* Info */}
                   <div>
-                    <a href={`/paintings/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <a href={item.itemType === 'craft' ? `/crafts/${item.id}` : `/paintings/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                       <p style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', marginBottom: '0.2rem', lineHeight: 1.3 }}>{item.title}</p>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>{item.artist}</p>
+                      {item.artist && <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>{item.artist}</p>}
                     </a>
                   </div>
 

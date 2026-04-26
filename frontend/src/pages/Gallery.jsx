@@ -15,7 +15,7 @@ export default function Gallery() {
   const [total, setTotal]               = useState(0);
 
   useEffect(() => {
-    paintingsAPI.getArtists()
+    paintingsAPI.getArtists({ type: 'painting' })
       .then(res => setArtists(res.data))
       .catch(console.error);
   }, []);
@@ -24,6 +24,7 @@ export default function Gallery() {
     setLoading(true);
     paintingsAPI.getAll({
       page, per_page: 20,
+      type: 'painting',
       ...(searchVal && { search: searchVal }),
       ...(artist    && { artist }),
       ...(sort      && { sort }),
@@ -216,13 +217,32 @@ export default function Gallery() {
       <section id="collection" style={{ padding: '5rem 0 6rem' }}>
         <div className="container">
 
-          {/* Header */}
+          {/* Header with collection tabs */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <p className="eyebrow" style={{ marginBottom: '0.5rem' }}>The Collection</p>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 300 }}>
-                Browse & Acquire
-              </h2>
+              <div style={{ display: 'flex', gap: '0', borderBottom: '1px solid var(--gray-100)' }}>
+                <span style={{
+                  padding: '0.5rem 0', paddingRight: '2rem',
+                  fontFamily: 'var(--font-display)', fontSize: 'clamp(1.25rem, 2.5vw, 2rem)', fontWeight: 300,
+                  borderBottom: '2px solid var(--black)', marginBottom: '-1px',
+                  color: 'var(--black)', whiteSpace: 'nowrap',
+                }}>
+                  Our Paintings Collection
+                </span>
+                <a href="/crafts" style={{
+                  padding: '0.5rem 0', paddingLeft: '2rem',
+                  fontFamily: 'var(--font-display)', fontSize: 'clamp(1.25rem, 2.5vw, 2rem)', fontWeight: 300,
+                  borderBottom: '2px solid transparent', marginBottom: '-1px',
+                  color: 'var(--gray-300)', whiteSpace: 'nowrap', textDecoration: 'none',
+                  transition: 'color 0.2s',
+                }}
+                  onMouseOver={e => e.currentTarget.style.color = 'var(--gray-500)'}
+                  onMouseOut={e => e.currentTarget.style.color = 'var(--gray-300)'}
+                >
+                  Our Crafts Collection
+                </a>
+              </div>
             </div>
             <p style={{ color: 'var(--gray-500)', fontSize: '0.875rem' }}>
               {loading ? 'Loading…' : `${total} work${total !== 1 ? 's' : ''}`}
