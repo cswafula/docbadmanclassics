@@ -12,6 +12,7 @@
   --gray-100: #e2e0d4;
   --gray-300: #b8b5a4;
   --gray-500: #7a7868;
+  --gray-600: #5c5b4a;
   --gray-700: #4a4a38;
 
   --font-display: 'Cormorant Garamond', Georgia, serif;
@@ -255,5 +256,37 @@ img { display: block; max-width: 100%; }
   }
   .checkout-layout > div:last-child {
     position: static !important;
+  }
+}
+
+/* ── Branch book slider ── */
+@keyframes branchContentReveal {
+  from { opacity: 0; transform: perspective(700px) rotateY(-7deg) translateX(-18px); }
+  to   { opacity: 1; transform: perspective(700px) rotateY(0deg)  translateX(0); }
+}
+@keyframes venueSlideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes progressSweep {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes spineReveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Locations highlight — stack on mobile */
+@media (max-width: 768px) {
+  .highlight-layout {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Branch book desktop tweaks */
+@media (max-width: 1024px) {
+  .branch-book-panels {
+    padding-left: 1.25rem !important;
   }
 }

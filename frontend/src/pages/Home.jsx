@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { paintingsAPI, craftsAPI } from '../services/api';
 
 /* ── Scroll reveal hook ── */
@@ -338,6 +338,523 @@ function CollectionCarousel({ paintings, loading, viewAllHref = '/gallery', item
   );
 }
 
+/* ── Branch data ── */
+const BRANCHES = [
+  {
+    id: 'kisumu',
+    city: 'Kisumu',
+    tagline: 'Lakeside City · Kenya',
+    description: 'A transport museum, art gallery and coffee shop for a memorable experience by the shores of Lake Victoria.',
+    image: '/img-coffee-2.jpg',
+    accentColor: '#4a9ebe',
+    gradientFrom: 'rgba(8, 24, 42, 0.92)',
+    gradientMid:  'rgba(8, 24, 42, 0.60)',
+    venues: [
+      { label: 'Transport Museum',  sub: 'Classic cars & motorcycles', href: '/museum'  },
+      { label: 'Art Gallery',       sub: 'Contemporary East African art', href: '/gallery' },
+      { label: 'Bad Duka Coffee',   sub: 'Coffee & garden · 9am – 9pm', href: '/coffee'  },
+    ],
+  },
+  {
+    id: 'kakamega',
+    city: 'Kakamega',
+    tagline: 'Forest Highlands · Kenya',
+    description: "Art, adventure and fine dining in Kenya's only tropical rainforest region, where culture runs as deep as the ancient trees.",
+    image: '/kakamega-landscape.jpeg',
+    accentColor: '#7ab860',
+    gradientFrom: 'rgba(4, 18, 6, 0.92)',
+    gradientMid:  'rgba(4, 18, 6, 0.60)',
+    venues: [
+      { label: 'Kabras Rock Camp',         sub: 'Wilderness retreat & camping', href: '/locations#kakamega' },
+      { label: 'Mama Factory Art Gallery', sub: 'Local & international artists', href: '/locations#kakamega' },
+      { label: 'Fine Dining Restaurant',   sub: 'Curated cuisine in the forest',  href: '/locations#kakamega' },
+    ],
+  },
+  {
+    id: 'narok',
+    city: 'Narok',
+    tagline: 'Gateway to the Mara · Kenya',
+    description: 'Contemporary art at the edge of the great Rift Valley, where the vast plains of the Maasai Mara meet the sky.',
+    image: '/suswa-landscape.jpg',
+    accentColor: '#c8843e',
+    gradientFrom: 'rgba(36, 13, 3, 0.92)',
+    gradientMid:  'rgba(36, 13, 3, 0.60)',
+    venues: [
+      { label: 'Mount Suswa Art Gallery', sub: 'Art at the edge of the Rift Valley', href: '/locations#narok' },
+    ],
+  },
+];
+
+/* ── Branch Book Slider ── */
+function BranchBook() {
+  const [active, setActive] = useState(0);
+  const [flipKey, setFlipKey] = useState(0);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const timerRef = useRef(null);
+  const activeRef = useRef(0);
+  activeRef.current = active;
+  const sectionRef = useReveal();
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  const advance = useCallback(() => {
+    const next = (activeRef.current + 1) % BRANCHES.length;
+    setActive(next);
+    setFlipKey(k => k + 1);
+  }, []);
+
+  const goTo = useCallback((idx) => {
+    if (idx === activeRef.current) return;
+    setActive(idx);
+    setFlipKey(k => k + 1);
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(advance, 6500);
+  }, [advance]);
+
+  useEffect(() => {
+    timerRef.current = setInterval(advance, 6500);
+    return () => clearInterval(timerRef.current);
+  }, [advance]);
+
+  const b = BRANCHES[active];
+
+  const branch = BRANCHES[active];
+
+  /* ── Mobile panel ── */
+  const MobilePanel = () => (
+    <div>
+      {/* Mobile tab row */}
+      <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        {BRANCHES.map((b, i) => (
+          <button
+            key={b.id}
+            onClick={() => goTo(i)}
+            style={{
+              flex: 1, padding: '0.875rem 0.5rem',
+              background: 'none', border: 'none', cursor: 'pointer',
+              borderBottom: i === active ? `3px solid ${b.accentColor}` : '3px solid transparent',
+              marginBottom: '-1px',
+              transition: 'border-color 0.3s',
+            }}
+          >
+            <p style={{
+              fontFamily: 'var(--font-body)', fontSize: '0.68rem', fontWeight: 700,
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+              color: i === active ? '#fff' : 'rgba(255,255,255,0.45)',
+              transition: 'color 0.3s',
+            }}>
+              {b.city}
+            </p>
+          </button>
+        ))}
+      </div>
+
+      {/* Mobile active panel */}
+      <div key={flipKey} style={{
+        position: 'relative', height: '420px', overflow: 'hidden',
+        animation: 'branchContentReveal 0.55s ease forwards',
+      }}>
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `url(${branch.image})`,
+          backgroundSize: 'cover', backgroundPosition: 'center',
+          filter: 'brightness(0.75)',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: `linear-gradient(to top, ${branch.gradientFrom} 0%, ${branch.gradientMid} 50%, transparent 100%)`,
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0, padding: '2rem',
+          display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+        }}>
+          <p style={{
+            fontFamily: 'var(--font-body)', fontSize: '0.6rem', fontWeight: 600,
+            letterSpacing: '0.32em', textTransform: 'uppercase',
+            color: branch.accentColor, marginBottom: '0.5rem',
+          }}>
+            {branch.tagline}
+          </p>
+          <h3 style={{
+            fontFamily: 'var(--font-display)', fontSize: 'clamp(2.4rem, 10vw, 3.5rem)',
+            fontWeight: 300, color: '#fff', lineHeight: 0.95,
+            letterSpacing: '-0.02em', marginBottom: '0.875rem',
+          }}>
+            {branch.city}
+          </h3>
+          <p style={{
+            fontSize: '0.82rem', color: 'rgba(255,255,255,0.65)',
+            lineHeight: 1.8, marginBottom: '1.5rem',
+          }}>
+            {branch.description}
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem', marginBottom: '1.25rem' }}>
+            {branch.venues.map((v, vi) => (
+              <a key={v.label} href={v.href} onClick={e => e.stopPropagation()}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.75rem',
+                  textDecoration: 'none',
+                  animation: `venueSlideIn 0.45s ease ${vi * 0.1}s both`,
+                }}>
+                <span style={{ width: '20px', height: '1px', backgroundColor: branch.accentColor, flexShrink: 0 }} />
+                <span style={{
+                  fontFamily: 'var(--font-body)', fontSize: '0.75rem', fontWeight: 600,
+                  letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff',
+                }}>
+                  {v.label}
+                </span>
+              </a>
+            ))}
+          </div>
+          <a href={`/locations#${branch.id}`} onClick={e => e.stopPropagation()} style={{
+            fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 600,
+            letterSpacing: '0.22em', textTransform: 'uppercase',
+            color: branch.accentColor, textDecoration: 'none',
+            borderBottom: `1px solid ${branch.accentColor}66`, paddingBottom: '2px',
+            width: 'fit-content',
+          }}>
+            Explore {branch.city} →
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <section style={{ backgroundColor: '#0d1410', padding: isMobile ? '3rem 0 0' : '5rem 0 0' }}>
+
+      {/* Section header */}
+      <div className="container" style={{ marginBottom: isMobile ? '1.5rem' : '2.5rem' }} ref={sectionRef}>
+        <div className="reveal" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <p style={{
+              fontFamily: 'var(--font-body)', fontSize: '0.62rem', fontWeight: 500,
+              letterSpacing: '0.35em', textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.4)', marginBottom: '0.75rem',
+            }}>
+              Three Cities · One Vision
+            </p>
+            <h2 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(2.4rem, 5vw, 4rem)',
+              fontWeight: 300, color: '#fff',
+              letterSpacing: '-0.02em', lineHeight: 0.95,
+            }}>
+              Our Locations
+            </h2>
+          </div>
+          <a href="/locations" style={{
+            fontFamily: 'var(--font-body)', fontSize: '0.68rem', fontWeight: 500,
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.45)', textDecoration: 'none',
+            borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '2px',
+            transition: 'color 0.2s, border-color 0.2s', whiteSpace: 'nowrap',
+          }}
+            onMouseOver={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#fff'; }}
+            onMouseOut={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
+          >
+            View All Locations →
+          </a>
+        </div>
+      </div>
+
+      {/* Mobile layout */}
+      {isMobile && <MobilePanel />}
+
+      {/* Desktop book panels */}
+      {!isMobile && (
+      <div
+        className="branch-book-panels"
+        style={{
+          display: 'flex',
+          height: '560px',
+          overflow: 'hidden',
+          paddingLeft: 'max(2rem, calc((100vw - 1280px) / 2 + 2rem))',
+        }}
+      >
+        {BRANCHES.map((branch, i) => {
+          const isActive = i === active;
+          return (
+            <div
+              key={branch.id}
+              onClick={() => goTo(i)}
+              className={isActive ? 'branch-panel-active' : 'branch-panel-inactive'}
+              style={{
+                flex: isActive ? '1 1 0' : '0 0 80px',
+                transition: 'flex 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                overflow: 'hidden',
+                cursor: isActive ? 'default' : 'pointer',
+                borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+              }}
+            >
+              {/* Background image */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                backgroundImage: `url(${branch.image})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                transform: isActive ? 'scale(1)' : 'scale(1.06)',
+                transition: 'transform 0.8s ease, filter 0.6s ease',
+                filter: isActive ? 'brightness(0.85)' : 'brightness(0.4) saturate(0.5)',
+                willChange: 'transform',
+              }} />
+
+              {/* Gradient overlay */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: isActive
+                  ? `linear-gradient(105deg, ${branch.gradientFrom} 0%, ${branch.gradientMid} 45%, transparent 100%)`
+                  : 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%)',
+                transition: 'background 0.6s ease',
+              }} />
+
+              {/* Inactive: spine label */}
+              {!isActive && (
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+                  animation: 'spineReveal 0.4s ease forwards',
+                }}>
+                  {/* Accent colour bar */}
+                  <span style={{
+                    display: 'block', width: '2px', height: '28px',
+                    backgroundColor: branch.accentColor, flexShrink: 0,
+                  }} />
+                  <p
+                    className="spine-label"
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.32em',
+                      textTransform: 'uppercase',
+                      color: '#fff',
+                      transform: 'rotate(-90deg)',
+                      whiteSpace: 'nowrap',
+                      textShadow: '0 1px 6px rgba(0,0,0,0.8)',
+                    }}
+                  >
+                    {branch.city}
+                  </p>
+                </div>
+              )}
+
+              {/* Active: full content */}
+              {isActive && (
+                <div
+                  key={flipKey}
+                  style={{
+                    position: 'absolute', inset: 0,
+                    padding: 'clamp(2rem, 3vw, 3rem)',
+                    display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+                    animation: 'branchContentReveal 0.65s cubic-bezier(0.4,0,0.2,1) forwards',
+                  }}
+                >
+                  {/* Branch number badge */}
+                  <p style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '0.6rem', letterSpacing: '0.35em', textTransform: 'uppercase',
+                    color: branch.accentColor,
+                    marginBottom: '0.5rem',
+                    opacity: 0.9,
+                  }}>
+                    {String(BRANCHES.indexOf(branch) + 1).padStart(2, '0')} · {branch.tagline}
+                  </p>
+
+                  {/* City name */}
+                  <h3 style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 'clamp(2.8rem, 5.5vw, 4.5rem)',
+                    fontWeight: 300,
+                    color: '#fff',
+                    lineHeight: 0.95,
+                    letterSpacing: '-0.02em',
+                    marginBottom: '1rem',
+                  }}>
+                    {branch.city}
+                  </h3>
+
+                  {/* Description */}
+                  <p style={{
+                    fontSize: '0.875rem',
+                    color: 'rgba(255,255,255,0.6)',
+                    lineHeight: 1.85,
+                    maxWidth: '380px',
+                    marginBottom: '2rem',
+                  }}>
+                    {branch.description}
+                  </p>
+
+                  {/* Venue list */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
+                    {branch.venues.map((v, vi) => (
+                      <a
+                        key={v.label}
+                        href={v.href}
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '0.875rem',
+                          textDecoration: 'none',
+                          animation: `venueSlideIn 0.5s ease ${0.25 + vi * 0.12}s both`,
+                        }}
+                      >
+                        <span style={{
+                          width: '28px', height: '1px',
+                          backgroundColor: branch.accentColor,
+                          display: 'block', flexShrink: 0,
+                          transition: 'width 0.3s ease',
+                        }} id={`line-${branch.id}-${vi}`} />
+                        <span>
+                          <span
+                            style={{
+                              display: 'block',
+                              fontFamily: 'var(--font-body)',
+                              fontSize: '0.78rem', fontWeight: 500,
+                              letterSpacing: '0.12em', textTransform: 'uppercase',
+                              color: 'rgba(255,255,255,0.82)',
+                              transition: 'color 0.2s',
+                              lineHeight: 1.2,
+                            }}
+                            onMouseOver={e => {
+                              e.currentTarget.style.color = '#fff';
+                              const line = document.getElementById(`line-${branch.id}-${vi}`);
+                              if (line) line.style.width = '44px';
+                            }}
+                            onMouseOut={e => {
+                              e.currentTarget.style.color = 'rgba(255,255,255,0.82)';
+                              const line = document.getElementById(`line-${branch.id}-${vi}`);
+                              if (line) line.style.width = '28px';
+                            }}
+                          >
+                            {v.label}
+                          </span>
+                          <span style={{ display: 'block', fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', marginTop: '1px' }}>
+                            {v.sub}
+                          </span>
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+
+                  {/* CTA */}
+                  <a
+                    href={`/locations#${branch.id}`}
+                    onClick={e => e.stopPropagation()}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                      fontFamily: 'var(--font-body)', fontSize: '0.68rem', fontWeight: 500,
+                      letterSpacing: '0.22em', textTransform: 'uppercase',
+                      color: branch.accentColor,
+                      textDecoration: 'none',
+                      borderBottom: `1px solid ${branch.accentColor}55`,
+                      paddingBottom: '2px',
+                      width: 'fit-content',
+                      animation: 'venueSlideIn 0.5s ease 0.55s both',
+                      transition: 'border-color 0.2s',
+                    }}
+                    onMouseOver={e => e.currentTarget.style.borderColor = branch.accentColor}
+                    onMouseOut={e => e.currentTarget.style.borderColor = `${branch.accentColor}55`}
+                  >
+                    Explore {branch.city}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </a>
+                </div>
+              )}
+
+              {/* Hover glow on inactive */}
+              {!isActive && (
+                <div
+                  style={{
+                    position: 'absolute', inset: 0,
+                    backgroundColor: 'rgba(255,255,255,0)',
+                    transition: 'background-color 0.3s',
+                  }}
+                  onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
+                  onMouseOut={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0)'}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+      )}
+
+      {/* Progress dots + branch nav — desktop only */}
+      {!isMobile && (
+      <div className="container" style={{ display: 'flex', alignItems: 'center', gap: '2rem', padding: '1.75rem 2rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          {BRANCHES.map((branch, i) => (
+            <button
+              key={branch.id}
+              onClick={() => goTo(i)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem 0',
+                display: 'flex', alignItems: 'center', gap: '0.625rem',
+                opacity: i === active ? 1 : 0.38,
+                transition: 'opacity 0.35s',
+              }}
+            >
+              <span style={{
+                display: 'block',
+                width: i === active ? '32px' : '14px',
+                height: '2px',
+                backgroundColor: i === active ? BRANCHES[i].accentColor : 'rgba(255,255,255,0.5)',
+                transition: 'width 0.45s ease, background-color 0.35s',
+                ...(i === active ? { animation: 'progressSweep 6.5s linear forwards', transformOrigin: 'left' } : {}),
+              }} />
+              <span style={{
+                fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 500,
+                letterSpacing: '0.2em', textTransform: 'uppercase',
+                color: i === active ? '#fff' : 'rgba(255,255,255,0.45)',
+                transition: 'color 0.35s',
+              }}>
+                {branch.city}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Divider + locations link */}
+        <span style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.07)', display: 'block', minWidth: '20px' }} />
+        <a href="/locations" style={{
+          fontFamily: 'var(--font-body)', fontSize: '0.62rem', fontWeight: 500,
+          letterSpacing: '0.18em', textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.3)', textDecoration: 'none',
+          transition: 'color 0.2s', whiteSpace: 'nowrap',
+        }}
+          onMouseOver={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
+          onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+        >
+          All Locations →
+        </a>
+      </div>
+      )}
+
+      {/* Mobile: bottom link */}
+      {isMobile && (
+        <div style={{ padding: '1.25rem 1.25rem', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <a href="/locations" style={{
+            fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 500,
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.4)', textDecoration: 'none',
+          }}>
+            All Locations →
+          </a>
+        </div>
+      )}
+
+    </section>
+  );
+}
+
 export default function Home() {
   const [activeTab, setActiveTab]   = useState('paintings');
   const [paintings, setPaintings]   = useState([]);
@@ -391,6 +908,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── BRANCH BOOK ── */}
+      <BranchBook />
 
       {/* ── GALLERY CAROUSEL ── */}
       <section style={{ padding: '5rem 0' }}>

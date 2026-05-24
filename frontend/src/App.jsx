@@ -20,6 +20,7 @@ import AdminOrders from './pages/admin/Orders';
 import OrderConfirmation from './pages/OrderConfirmation';
 import AdminDeliveryRegions from './pages/admin/DeliveryRegions';
 import AdminUsers from './pages/admin/Users';
+import Locations from './pages/Locations';
 import Donate from './pages/Donate';
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
         {path === '/about'                     && <About />}
         {path === '/museum'                    && <Museum />}
         {path === '/coffee'                    && <Coffee />}
+        {path === '/locations'                 && <Locations />}
         {path === '/order-confirmation'        && <OrderConfirmation />}
         {path === '/donate'                    && <Donate />}
       </main>
