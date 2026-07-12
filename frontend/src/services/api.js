@@ -26,6 +26,7 @@ export const paintingsAPI = {
 
 export const craftsAPI = {
   getAll: (params) => api.get('/crafts', { params }),
+  getFeatured: () => api.get('/crafts/featured'),
   getById: (id) => api.get(`/crafts/${id}`),
 };
 
@@ -81,6 +82,24 @@ export const adminDeliveryRegionsAPI = {
   create: (data) => api.post('/admin/delivery-regions', data),
   update: (id, data) => api.put(`/admin/delivery-regions/${id}`, data),
   delete: (id) => api.delete(`/admin/delivery-regions/${id}`),
+};
+
+// ── Partners (public) ────────────────────────────────────
+export const partnersAPI = {
+  getAll: () => api.get('/partners'),
+};
+
+// ── Admin Partners ────────────────────────────────────────
+export const adminPartnersAPI = {
+  getAll: () => api.get('/admin/partners'),
+  getById: (id) => api.get(`/admin/partners/${id}`),
+  create: (formData) => api.post('/admin/partners', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  update: (id, data) => api.post(`/admin/partners/${id}`, data, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  delete: (id) => api.delete(`/admin/partners/${id}`),
 };
 
 // ── Admin Users ───────────────────────────────────────────

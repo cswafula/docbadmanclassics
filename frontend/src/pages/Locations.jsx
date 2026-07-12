@@ -124,24 +124,16 @@ const BRANCHES = [
     accentColor: '#c8843e',
     darkBg: '#200a02',
     established: 'Coming Soon',
-    highlights: [
-      {
-        id: 'narok-1',
-        title: 'Narok — Coming Soon',
-        desc: 'Art at the edge of the Rift Valley — an early look at what\'s taking shape at Mount Suswa.',
-        src: '/videos/narok-1.mp4',
-        poster: '/suswa-landscape.png',
-      },
-    ],
     venues: [
       {
         label: 'Mount Suswa Art Gallery',
         sub: 'Rift Valley · Kenya',
         desc: 'Art at the edge of the world — a gallery perched on the slopes of Mount Suswa, with views across the Rift Valley and a collection that honours the land and its people.',
         image: '/suswa-landscape.png',
+        video: '/videos/suswa_preview.mp4',
         href: '/locations#narok',
         cta: 'Coming Soon',
-        comingSoon: true,
+        brandNew: true,
       },
     ],
   },
@@ -149,6 +141,16 @@ const BRANCHES = [
 
 function VenueCard({ venue, accent, index }) {
   const ref = useReveal();
+  const videoRef = useRef(null);
+  const [playing, setPlaying] = useState(true);
+
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); }
+    else          { v.pause(); setPlaying(false); }
+  };
+
   return (
     <div ref={ref} className="reveal" style={{ transitionDelay: `${index * 0.1}s` }}>
       <div style={{
@@ -158,21 +160,66 @@ function VenueCard({ venue, accent, index }) {
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         minHeight: '280px',
-        ...(index % 2 === 1 ? {} : {}),
       }}>
-        {/* Image */}
+        {/* Image or Video */}
         <div style={{ overflow: 'hidden', position: 'relative', ...(index % 2 === 1 ? { order: 2 } : {}) }}>
-          <img
-            src={venue.image}
-            alt={venue.label}
-            style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-              display: 'block', transition: 'transform 0.7s ease',
-            }}
-            onMouseOver={e => !venue.comingSoon && (e.currentTarget.style.transform = 'scale(1.04)')}
-            onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-          />
-          {venue.comingSoon && (
+          {venue.video ? (
+            <>
+              <video
+                ref={videoRef}
+                src={venue.video}
+                poster={venue.image}
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+              {/* Play/pause button */}
+              <button
+                onClick={togglePlay}
+                style={{
+                  position: 'absolute', bottom: '0.75rem', right: '0.75rem',
+                  width: '36px', height: '36px', borderRadius: '50%',
+                  backgroundColor: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.4)',
+                  color: '#fff', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.8rem', backdropFilter: 'blur(4px)',
+                  transition: 'background 0.2s',
+                }}
+                onMouseOver={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.75)'}
+                onMouseOut={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.55)'}
+                aria-label={playing ? 'Pause' : 'Play'}
+              >
+                {playing ? '⏸' : '▶'}
+              </button>
+              {/* Brand New badge */}
+              {venue.brandNew && (
+                <div style={{
+                  position: 'absolute', top: '0.75rem', left: '0.75rem',
+                  backgroundColor: 'var(--accent)',
+                  padding: '0.3rem 0.75rem',
+                }}>
+                  <p style={{
+                    fontFamily: 'var(--font-body)', fontSize: '0.6rem', fontWeight: 600,
+                    letterSpacing: '0.25em', textTransform: 'uppercase', color: '#fff',
+                  }}>Brand New!</p>
+                </div>
+              )}
+            </>
+          ) : (
+            <img
+              src={venue.image}
+              alt={venue.label}
+              style={{
+                width: '100%', height: '100%', objectFit: 'cover',
+                display: 'block', transition: 'transform 0.7s ease',
+              }}
+              onMouseOver={e => !venue.comingSoon && (e.currentTarget.style.transform = 'scale(1.04)')}
+              onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+            />
+          )}
+          {venue.comingSoon && !venue.brandNew && (
             <div style={{
               position: 'absolute', inset: 0,
               backgroundColor: 'rgba(0,0,0,0.35)',

@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\PesaPalController;
 use App\Http\Controllers\Api\DeliveryRegionController;
 use App\Http\Controllers\Api\Admin\AdminDeliveryRegionController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
+use App\Http\Controllers\Api\PartnerController;
+use App\Http\Controllers\Api\Admin\AdminPartnerController;
 
 // ── Public routes ──────────────────────────────────────────
 Route::prefix('v1')->group(function () {
@@ -22,6 +24,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/artists',            [PaintingController::class, 'artists']);
 
     Route::get('/crafts',             [CraftController::class, 'index']);
+    Route::get('/crafts/featured',    [CraftController::class, 'featured']);
     Route::get('/crafts/{id}',        [CraftController::class, 'show']);
 
     Route::post('/admin/login', [AuthController::class, 'login']);
@@ -32,6 +35,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/pesapal/ipn',        [PesaPalController::class, 'ipn']);
 
     Route::get('/delivery-regions', [DeliveryRegionController::class, 'index']);
+    Route::get('/partners',         [PartnerController::class, 'index']);
 
     Route::get('/pesapal/verify', [PesaPalController::class, 'verify']);
 });
@@ -75,4 +79,11 @@ Route::prefix('v1')->group(function () {
     Route::post('/users',                   [AdminUserController::class, 'store']);
     Route::patch('/users/{id}/password',    [AdminUserController::class, 'updatePassword']);
     Route::delete('/users/{id}',            [AdminUserController::class, 'destroy']);
+
+    // Partners
+    Route::get('/partners',             [AdminPartnerController::class, 'index']);
+    Route::get('/partners/{id}',        [AdminPartnerController::class, 'show']);
+    Route::post('/partners',            [AdminPartnerController::class, 'store']);
+    Route::post('/partners/{id}',       [AdminPartnerController::class, 'update']);
+    Route::delete('/partners/{id}',     [AdminPartnerController::class, 'destroy']);
 });

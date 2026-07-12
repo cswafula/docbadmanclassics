@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { paintingsAPI, craftsAPI } from '../services/api';
+import { paintingsAPI, craftsAPI, partnersAPI } from '../services/api';
 
 /* ── Scroll reveal hook ── */
 function useReveal() {
@@ -855,10 +855,218 @@ function BranchBook() {
   );
 }
 
+/* ── Partners Slider ── */
+function PartnerModal({ partner, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '1.5rem',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          backgroundColor: '#fff', maxWidth: '440px', width: '100%',
+          padding: '2.5rem', position: 'relative',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.2)',
+        }}
+      >
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute', top: '1rem', right: '1rem',
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '1.1rem', color: 'var(--gray-500)', lineHeight: 1,
+          }}
+        >✕</button>
+
+        {/* Logo */}
+        <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          {partner.logo ? (
+            <img src={partner.logo} alt={partner.name} style={{ height: '52px', maxWidth: '120px', objectFit: 'contain' }} />
+          ) : (
+            <div style={{ width: '52px', height: '52px', backgroundColor: 'var(--cream)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>◉</div>
+          )}
+          <div>
+            <p className="eyebrow-accent" style={{ marginBottom: '0.3rem' }}>Partner</p>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 300, color: 'var(--black)' }}>{partner.name}</h3>
+          </div>
+        </div>
+
+        {/* Description */}
+        {partner.description && (
+          <p style={{ fontSize: '0.875rem', lineHeight: 1.85, color: 'var(--gray-700)', marginBottom: '1.75rem' }}>
+            {partner.description}
+          </p>
+        )}
+
+        {/* Map location */}
+        {partner.map_url && (
+          <a
+            href={partner.map_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.625rem',
+              fontSize: '0.75rem', fontWeight: 500, letterSpacing: '0.12em',
+              textTransform: 'uppercase', textDecoration: 'none',
+              color: 'var(--black)', marginBottom: '1rem',
+              padding: '0.75rem 1rem',
+              border: '1px solid var(--gray-100)',
+              backgroundColor: 'var(--cream)',
+            }}
+          >
+            <span style={{ fontSize: '1rem' }}>📍</span>
+            View on Google Maps
+          </a>
+        )}
+
+        {/* Website */}
+        {partner.website_url && (
+          <a
+            href={partner.website_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
+            style={{ display: 'block', textAlign: 'center', fontSize: '0.7rem' }}
+          >
+            Visit Website
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PartnersSlider({ partners }) {
+  const [selected, setSelected] = useState(null);
+  const trackRef = useRef(null);
+  const [overflows, setOverflows] = useState(false);
+  const [atStart, setAtStart]   = useState(true);
+  const [atEnd, setAtEnd]       = useState(false);
+
+  const updateState = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const scrollable = el.scrollWidth > el.clientWidth + 2;
+    setOverflows(scrollable);
+    setAtStart(el.scrollLeft <= 1);
+    setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 2);
+  }, []);
+
+  useEffect(() => {
+    updateState();
+    const el = trackRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(updateState);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [partners, updateState]);
+
+  const scroll = (dir) => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * 540, behavior: 'smooth' });
+    setTimeout(updateState, 380);
+  };
+
+  if (partners.length === 0) return null;
+
+  return (
+    <>
+      <section style={{ backgroundColor: 'var(--cream)', borderTop: '1px solid var(--gray-100)', borderBottom: '1px solid var(--gray-100)', padding: '4rem 0' }}>
+        <div className="container" style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
+          <p className="eyebrow" style={{ marginBottom: '0.6rem' }}>Our Network</p>
+          <h2 className="display" style={{ fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', color: 'var(--black)' }}>Our Partners</h2>
+        </div>
+
+        <div style={{ position: 'relative' }}>
+          {/* Fade + arrow — left */}
+          {overflows && !atStart && (
+            <>
+              <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '80px', background: 'linear-gradient(to right, var(--cream), transparent)', zIndex: 2, pointerEvents: 'none' }} />
+              <button
+                onClick={() => scroll(-1)}
+                style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', zIndex: 3, width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#fff', border: '1px solid var(--gray-100)', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', color: 'var(--black)' }}
+              >‹</button>
+            </>
+          )}
+
+          {/* Fade + arrow — right */}
+          {overflows && !atEnd && (
+            <>
+              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '80px', background: 'linear-gradient(to left, var(--cream), transparent)', zIndex: 2, pointerEvents: 'none' }} />
+              <button
+                onClick={() => scroll(1)}
+                style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', zIndex: 3, width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#fff', border: '1px solid var(--gray-100)', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', color: 'var(--black)' }}
+              >›</button>
+            </>
+          )}
+
+          {/* Scrollable track */}
+          <div
+            ref={trackRef}
+            onScroll={updateState}
+            className="partners-track"
+            style={{ justifyContent: overflows ? 'flex-start' : 'center' }}
+          >
+            {partners.map(p => (
+              <button
+                key={p.id}
+                onClick={() => setSelected(p)}
+                title={`View ${p.name}`}
+                style={{
+                  flexShrink: 0,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  width: '160px', height: '100px',
+                  backgroundColor: '#fff',
+                  border: '1px solid var(--gray-100)',
+                  cursor: 'pointer',
+                  padding: '1rem',
+                  gap: '0.5rem',
+                  transition: 'box-shadow 0.2s, transform 0.2s, border-color 0.2s',
+                }}
+                onMouseOver={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
+                onMouseOut={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--gray-100)'; }}
+              >
+                {p.logo ? (
+                  <img src={p.logo} alt={p.name} style={{ maxHeight: '44px', maxWidth: '120px', objectFit: 'contain' }} />
+                ) : (
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--gray-700)', textAlign: 'center', lineHeight: 1.3 }}>{p.name}</span>
+                )}
+                {p.logo && (
+                  <span style={{ fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--gray-500)' }}>{p.name}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)', letterSpacing: '0.05em' }}>Click any partner to learn more</p>
+        </div>
+      </section>
+
+      {selected && <PartnerModal partner={selected} onClose={() => setSelected(null)} />}
+    </>
+  );
+}
+
 export default function Home() {
   const [activeTab, setActiveTab]   = useState('paintings');
   const [paintings, setPaintings]   = useState([]);
   const [crafts, setCrafts]         = useState([]);
+  const [partners, setPartners]     = useState([]);
   const [loading, setLoading]       = useState(true);
   const galleryRef = useReveal();
   const pillarsRef = useReveal();
@@ -866,12 +1074,14 @@ export default function Home() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      paintingsAPI.getAll({ per_page: 20 }),
-      craftsAPI.getAll({ per_page: 20 }),
+      paintingsAPI.getFeatured(),
+      craftsAPI.getFeatured(),
+      partnersAPI.getAll(),
     ])
-      .then(([pRes, cRes]) => {
+      .then(([pRes, cRes, ptRes]) => {
         setPaintings(pRes.data.data);
         setCrafts(cRes.data.data);
+        setPartners(ptRes.data);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -963,6 +1173,9 @@ export default function Home() {
           />
         </div>
       </section>
+
+      {/* ── PARTNERS ── */}
+      <PartnersSlider partners={partners} />
 
       {/* ── SOCIAL ── */}
       <section style={{ backgroundColor: 'var(--black)', padding: '3.5rem 0' }}>

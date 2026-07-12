@@ -20,6 +20,8 @@ import AdminOrders from './pages/admin/Orders';
 import OrderConfirmation from './pages/OrderConfirmation';
 import AdminDeliveryRegions from './pages/admin/DeliveryRegions';
 import AdminUsers from './pages/admin/Users';
+import AdminPartners from './pages/admin/Partners';
+import PartnerForm from './pages/admin/PartnerForm';
 import Locations from './pages/Locations';
 import Donate from './pages/Donate';
 
@@ -38,6 +40,9 @@ function App() {
   if (path === '/admin/orders')                         return <AdminOrders />;
   if (path === '/admin/delivery-regions')               return <AdminDeliveryRegions />;
   if (path === '/admin/users')                          return <AdminUsers />;
+  if (path === '/admin/partners')                       return <AdminPartners />;
+  if (path === '/admin/partners/new')                   return <PartnerForm />;
+  if (path.match(/^\/admin\/partners\/\d+\/edit$/))     return <PartnerForm />;
 
 
   // ── Customer routes ───────────────────────

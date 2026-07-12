@@ -130,18 +130,20 @@ class AdminPaintingController extends Controller
         'is_available' => $request->input('is_available', '1') == '1',
     ]);
 
-    // Add new images if provided
+    // Replace all images when new ones are provided
     if ($request->hasFile('images')) {
-        $lastOrder = $painting->images()->max('order') ?? -1;
+        foreach ($painting->images as $old) {
+            Storage::disk('public')->delete($old->image_path);
+        }
+        $painting->images()->delete();
 
         foreach ($request->file('images') as $index => $image) {
             $path = $image->store('paintings', 'public');
-
             PaintingImage::create([
                 'painting_id' => $painting->id,
                 'image_path'  => $path,
-                'order'       => $lastOrder + $index + 1,
-                'is_primary'  => $painting->images()->count() === 0,
+                'order'       => $index,
+                'is_primary'  => $index === 0,
             ]);
         }
     }

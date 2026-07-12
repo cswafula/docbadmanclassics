@@ -35,13 +35,9 @@ class PaintingController extends Controller
      */
     public function featured()
     {
-        $paintings = Painting::with('images')
-            ->available()
-            ->featured()
-            ->limit(6)
-            ->get();
-
-        return response()->json($paintings);
+        return response()->json(
+            Painting::with('images')->featured()->latest()->paginate(20)
+        );
     }
 
     /**

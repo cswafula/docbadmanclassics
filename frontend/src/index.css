@@ -290,3 +290,14 @@ img { display: block; max-width: 100%; }
     padding-left: 1.25rem !important;
   }
 }
+/* ── Partners slider track ── */
+.partners-track {
+  display: flex;
+  gap: 1.25rem;
+  padding: 0.5rem 3rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.partners-track::-webkit-scrollbar { display: none; }

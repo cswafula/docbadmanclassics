@@ -25,6 +25,11 @@ class CraftController extends Controller
         return response()->json($query->paginate(20));
     }
 
+    public function featured()
+    {
+        return response()->json(Craft::featured()->latest()->paginate(20));
+    }
+
     public function show($id)
     {
         $craft = Craft::findOrFail($id);

@@ -19,6 +19,7 @@ const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard',        icon: '▤' },
   { label: 'Paintings', href: '/admin/paintings',        icon: '◻' },
   { label: 'Crafts',    href: '/admin/crafts',           icon: '◇' },
+  { label: 'Partners',  href: '/admin/partners',         icon: '◉' },
   { label: 'Orders',    href: '/admin/orders',           icon: '◈' },
   { label: 'Regions',   href: '/admin/delivery-regions', icon: '◎' },
   { label: 'Users',     href: '/admin/users',            icon: '◯' },
